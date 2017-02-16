@@ -73,8 +73,8 @@ func (c *Civilization) BroadcastPosition() {
 	nearby_civils := c.ContainerUniverse.GetNearbyCivilizations(c, 10)
 	for _, civil := range nearby_civils {
 		dist := GetDistance(c.Position, civil.Position)
-		timer := int(dist / speed)
-		go c.SendMessage(timer, civil.MessageChannel)
+		arrival_time := int(dist / speed) + c.NumYears
+		go c.SendMessage(arrival_time, civil.MessageChannel)
 	}
 }
 
@@ -82,9 +82,9 @@ func (c *Civilization) BroadcastPosition() {
  * Send message to another civilization via its message channel, this 
  * simulates the late arrival of message using a timer
  */
-func (c *Civilization) SendMessage(timer int, channel chan *Coordinate) {
+func (c *Civilization) SendMessage(arrival_time int, channel chan *Coordinate) {
 	for {
-		if c.NumYears + timer <= c.ContainerUniverse.NumYears {
+		if c.NumYears >= arrival_time {
 			channel <- c.Position
 			break
 		}
