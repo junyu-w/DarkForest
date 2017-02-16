@@ -1,36 +1,36 @@
 package models
 
 import (
-	"math/rand"
 	"dark_forest/utils"
 	"fmt"
+	"math/rand"
 )
 
 type Civilization struct {
-	Id int
-	Position *Coordinate
-	Type string
-	NumYears int
-	Range float64 // unit: lightyear
-	MatterOwned float64
-	Level int
+	Id                int
+	Position          *Coordinate
+	Type              string
+	NumYears          int
+	Range             float64 // unit: lightyear
+	MatterOwned       float64
+	Level             int
 	ContainerUniverse *Universe
-	Revealed bool
-	MessageChannel chan *Coordinate
+	Revealed          bool
+	MessageChannel    chan *Coordinate
 }
 
 func NewCivilization(id int, pos *Coordinate, category string, universe *Universe) *Civilization {
-	return &Civilization {
-		Id: id,
-		Position: pos,
-		Type: category,
-		NumYears: 0,
-		Range: 10e-10,
-		MatterOwned: 10e-5,
-		Level: utils.LIGHTSPEED_x0001,
+	return &Civilization{
+		Id:                id,
+		Position:          pos,
+		Type:              category,
+		NumYears:          0,
+		Range:             10e-10,
+		MatterOwned:       10e-5,
+		Level:             utils.LIGHTSPEED_x0001,
 		ContainerUniverse: universe,
-		Revealed: false,
-		MessageChannel: make(chan *Coordinate),
+		Revealed:          false,
+		MessageChannel:    make(chan *Coordinate),
 	}
 }
 
@@ -40,13 +40,12 @@ func NewCivilization(id int, pos *Coordinate, category string, universe *Univers
  * civilization level to increase as well
  */
 func (c *Civilization) Evovle(num_year int) {
-	c.NumYears += 1
-	c.MatterOwned += (c.Range * c.Range)/c.ContainerUniverse.GetArea() * float64(rand.Int31n(100))
+	c.NumYears += num_year
+	c.MatterOwned += (c.Range * c.Range) / c.ContainerUniverse.GetArea() * float64(rand.Int31n(100))
 	c.Range += 0.02 // TODO: let's not use fixed numebrs
 	matterPercentage := c.MatterOwned / c.ContainerUniverse.TotalMatter
 	c.Level = getLevel(matterPercentage)
 }
-
 
 func getLevel(matterPercentage float64) int {
 	switch {
@@ -71,15 +70,17 @@ func (c *Civilization) BroadcastPosition() {
 	speed := getInfoSpeed(c.Level)
 	c.Revealed = true
 	nearby_civils := c.ContainerUniverse.GetNearbyCivilizations(c, 10)
+	fmt.Println("[REVEAL] Civilization ", c.Id, "choose to broadcast position")
 	for _, civil := range nearby_civils {
 		dist := GetDistance(c.Position, civil.Position)
-		arrival_time := int(dist / speed) + c.NumYears
+		arrival_time := int(dist/speed) + c.NumYears
+		fmt.Println("from ", c.Id, " to ", civil.Id, "now: ", c.NumYears, " then: ", arrival_time)
 		go c.SendMessage(arrival_time, civil.MessageChannel)
 	}
 }
 
 /**
- * Send message to another civilization via its message channel, this 
+ * Send message to another civilization via its message channel, this
  * simulates the late arrival of message using a timer
  */
 func (c *Civilization) SendMessage(arrival_time int, channel chan *Coordinate) {
@@ -90,7 +91,6 @@ func (c *Civilization) SendMessage(arrival_time int, channel chan *Coordinate) {
 		}
 	}
 }
-
 
 func getInfoSpeed(civil_level int) float64 {
 	switch civil_level {
@@ -108,11 +108,10 @@ func getInfoSpeed(civil_level int) float64 {
 	return utils.LIGHTSPEED * 0.0001
 }
 
-
 // TODO: what to do after message arrived
 func (civil *Civilization) ProcessMessage() {
 	for {
 		info := <-civil.MessageChannel
-		fmt.Printf("Civilization %d got position (%d, %d)", civil.Id, info.x, info.y)
+		fmt.Printf("[DISCOVERY] Civilization %d got position (%d, %d)\n", civil.Id, info.x, info.y)
 	}
 }

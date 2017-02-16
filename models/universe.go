@@ -1,27 +1,26 @@
 package models
 
 import (
+	"dark_forest/utils"
 	"fmt"
 	"math/rand"
-	"dark_forest/utils"
 )
 
 type Universe struct {
-	width int64
+	width  int64
 	height int64
 
-	NumYears int // unit: year
-	TotalMatter float64
+	NumYears               int // unit: year
+	TotalMatter            float64
 	ContainedCivilizations map[*Coordinate]*Civilization
 }
 
-
 func NewUniverse() *Universe {
-	return &Universe {
-		width: utils.WIDTH,
-		height: utils.HEIGHT,
-		NumYears: 0,
-		TotalMatter: utils.TOTAL_MATTER,
+	return &Universe{
+		width:                  utils.WIDTH,
+		height:                 utils.HEIGHT,
+		NumYears:               0,
+		TotalMatter:            utils.TOTAL_MATTER,
 		ContainedCivilizations: make(map[*Coordinate]*Civilization),
 	}
 }
@@ -31,7 +30,7 @@ func (u *Universe) GetArea() float64 {
 }
 
 func (u *Universe) GetNearbyCivilizations(c *Civilization, limit int) []*Civilization {
-	all_pos := make([]*Coordinate, 0, len(u.ContainedCivilizations))
+	all_pos := make([]*Coordinate, 0, len(u.ContainedCivilizations)+1)
 	for pos, _ := range u.ContainedCivilizations {
 		all_pos = append(all_pos, pos)
 	}
@@ -49,15 +48,18 @@ func (u *Universe) GetNearbyCivilizations(c *Civilization, limit int) []*Civiliz
  * randomeness
  */
 func (u *Universe) Evovle(num_year int) {
-	// TODO: add broadcasting mechanism for civilization
-	u.NumYears += 1
-	for pos, civil := range u.ContainedCivilizations {
+	u.NumYears += num_year
+	for _, civil := range u.ContainedCivilizations {
 		civil.Evovle(num_year)
-		fmt.Println("Civilization ", civil.Id, " at position ", pos, " has evovled")
+		// fmt.Println("[EVOLVE] Civilization ", civil.Id, " at position ", pos, " has evovled")
+		// TODO: add broadcasting mechanism for civilization
+		if len(u.ContainedCivilizations) > 10 && civil.Revealed == false {
+			civil.BroadcastPosition()
+		}
 	}
 	shouldCreateUniverse := rand.Intn(10) > 5 // TODO: this should change to something based on num of existing civil
 	if shouldCreateUniverse {
-		new_pos := &Coordinate {
+		new_pos := &Coordinate{
 			x: rand.Int63n(utils.WIDTH),
 			y: rand.Int63n(utils.HEIGHT),
 		}
@@ -66,7 +68,6 @@ func (u *Universe) Evovle(num_year int) {
 		u.ContainedCivilizations[new_pos] = new_c
 		// start message receiving process
 		go new_c.ProcessMessage()
-		fmt.Println("Civilization ", id, " is created!!")
+		fmt.Println("[CREATE] Civilization ", id, " is created!!")
 	}
 }
-

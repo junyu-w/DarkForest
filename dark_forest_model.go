@@ -7,6 +7,6 @@ import (
 func BuildAndRunModel() {
 	u := models.NewUniverse()
 	for {
-		u.Evovle(1)
+		u.Evovle(1000)
 	}
 }

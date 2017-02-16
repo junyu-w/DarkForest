@@ -1,8 +1,8 @@
 package models
 
 import (
-	"sort"
 	"math"
+	"sort"
 )
 
 type Coordinate struct {
@@ -10,7 +10,11 @@ type Coordinate struct {
 	y int64
 }
 
-type ByDistance []*Coordinate
+type CoordDistPair struct {
+	coord, dist interface{}
+}
+
+type ByDistance []*CoordDistPair
 
 func (s ByDistance) Len() int {
 	return len(s)
@@ -21,10 +25,7 @@ func (s ByDistance) Swap(i, j int) {
 }
 
 func (s ByDistance) Less(i, j int) bool {
-	orig := s[len(s)-1]
-	dist_i := GetDistance(orig, s[i])
-	dist_j := GetDistance(orig, s[j])
-	return dist_i < dist_j
+	return s[i].dist.(float64) < s[j].dist.(float64)
 }
 
 func GetDistance(a, b *Coordinate) float64 {
@@ -33,9 +34,17 @@ func GetDistance(a, b *Coordinate) float64 {
 	return math.Sqrt(float64(x_diff*x_diff + y_diff*y_diff))
 }
 
-
-func SortByDistance(orig *Coordinate, others []*Coordinate) []*Coordinate {
-	all := append(others, orig)
-	sort.Sort(ByDistance(all))
-	return all[1:len(all)]
+func SortByDistance(orig *Coordinate, all []*Coordinate) []*Coordinate {
+	all = append(all, orig)
+	coord_dist_list := make([]*CoordDistPair, 0, len(all))
+	for _, other := range all {
+		dist := GetDistance(orig, other)
+		coord_dist_list = append(coord_dist_list, &CoordDistPair{other, dist})
+	}
+	sort.Sort(ByDistance(coord_dist_list))
+	sorted_coord := make([]*Coordinate, len(all), len(all))
+	for i := 0; i < len(all); i++ {
+		sorted_coord[i] = coord_dist_list[i].coord.(*Coordinate)
+	}
+	return sorted_coord[2:len(all)]
 }

@@ -10,7 +10,7 @@ const (
 	LIGHTSPEED_x10
 )
 const (
-	CONQUERER string = "conquerer"
+	CONQUERER    string = "conquerer"
 	CONSERVATIVE string = "conservative"
 )
 
@@ -18,15 +18,13 @@ const (
 	LIGHTSPEED float64 = 1
 )
 
-
 // ########## Universe Constants #################
 
 // assume a fixed size universe
 const (
-	WIDTH int64= 10e6
+	WIDTH  int64 = 10e6
 	HEIGHT int64 = 10e6
 )
-
 
 const (
 	TOTAL_MATTER float64 = 10e10
