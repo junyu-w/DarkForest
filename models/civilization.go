@@ -2,6 +2,8 @@ package models
 
 import (
 	"math/rand"
+	"dark_forest/utils"
+	"fmt"
 )
 
 type Civilization struct {
@@ -11,28 +13,11 @@ type Civilization struct {
 	NumYears int
 	Range float64 // unit: lightyear
 	MatterOwned float64
-	Level level
+	Level int
 	ContainerUniverse *Universe
+	Revealed bool
+	MessageChannel chan *Coordinate
 }
-
-type Coordinate struct {
-	x int64
-	y int64
-}
-
-type level int
-const (
-	DESOLATE level = 1 + iota
-	EARTH
-	TRISOLARIS
-	DIMENSION_TECH
-	MINI_UNIVERSE
-)
-
-const (
-	CONQUERER string = "conquerer"
-	CONSERVATIVE string = "conservative"
-)
 
 func NewCivilization(id int, pos *Coordinate, category string, universe *Universe) *Civilization {
 	return &Civilization {
@@ -42,8 +27,10 @@ func NewCivilization(id int, pos *Coordinate, category string, universe *Univers
 		NumYears: 0,
 		Range: 10e-10,
 		MatterOwned: 10e-5,
-		Level: DESOLATE,
+		Level: utils.LIGHTSPEED_x0001,
 		ContainerUniverse: universe,
+		Revealed: false,
+		MessageChannel: make(chan *Coordinate),
 	}
 }
 
@@ -60,18 +47,68 @@ func (c *Civilization) Evovle(num_year int) {
 	c.Level = getLevel(matterPercentage)
 }
 
-func getLevel(matterPercentage float64) level {
+
+func getLevel(matterPercentage float64) int {
 	switch {
 	case matterPercentage >= 10e-13:
-		return DESOLATE
+		return utils.LIGHTSPEED_x0001
 	case matterPercentage >= 10e-11:
-		return EARTH
+		return utils.LIGHTSPEED_x001
 	case matterPercentage >= 10e-7:
-		return TRISOLARIS
+		return utils.LIGHTSPEED_x1
 	case matterPercentage >= 10e-5:
-		return DIMENSION_TECH
+		return utils.LIGHTSPEED_x2
 	case matterPercentage >= 10e-2:
-		return MINI_UNIVERSE
+		return utils.LIGHTSPEED_x10
 	}
-	return DESOLATE
+	return utils.LIGHTSPEED_x0001
+}
+
+/**
+ * Civilization chose to reveal itself in the dark forest
+ */
+func (c *Civilization) BroadcastPosition() {
+	speed := getInfoSpeed(c.Level)
+	c.Revealed = true
+	nearby_civils := c.ContainerUniverse.GetNearbyCivilizations(c, 10)
+	for _, civil := range nearby_civils {
+		dist := GetDistance(c.Position, civil.Position)
+		timer := int(dist / speed)
+		go c.SendMessage(timer, civil.MessageChannel)
+	}
+}
+
+func (c *Civilization) SendMessage(timer int, channel chan *Coordinate) {
+	for {
+		if c.NumYears + timer <= c.ContainerUniverse.NumYears {
+			channel <- c.Position
+			break
+		}
+	}
+}
+
+
+func getInfoSpeed(civil_level int) float64 {
+	switch civil_level {
+	case utils.LIGHTSPEED_x0001:
+		return utils.LIGHTSPEED * 0.0001
+	case utils.LIGHTSPEED_x001:
+		return utils.LIGHTSPEED * 0.001
+	case utils.LIGHTSPEED_x1:
+		return utils.LIGHTSPEED
+	case utils.LIGHTSPEED_x2:
+		return utils.LIGHTSPEED * 2
+	case utils.LIGHTSPEED_x10:
+		return utils.LIGHTSPEED * 10
+	}
+	return utils.LIGHTSPEED * 0.0001
+}
+
+
+// TODO: what to do after message arrived
+func (civil *Civilization) ProcessMessage() {
+	for {
+		info := <-civil.MessageChannel
+		fmt.Printf("Civilization %d got position (%d, %d)", civil.Id, info.x, info.y)
+	}
 }

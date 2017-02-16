@@ -3,33 +3,25 @@ package models
 import (
 	"fmt"
 	"math/rand"
-)
-
-// assume a fixed size universe
-const (
-	WIDTH int64= 10e6
-	HEIGHT int64 = 10e6
+	"dark_forest/utils"
 )
 
 type Universe struct {
 	width int64
 	height int64
 
-	Duration int // unit: year
+	NumYears int // unit: year
 	TotalMatter float64
 	ContainedCivilizations map[*Coordinate]*Civilization
 }
 
-const (
-	TOTAL_MATTER float64 = 10e10
-)
 
 func NewUniverse() *Universe {
 	return &Universe {
-		width: WIDTH,
-		height: HEIGHT,
-		Duration: 0,
-		TotalMatter: TOTAL_MATTER,
+		width: utils.WIDTH,
+		height: utils.HEIGHT,
+		NumYears: 0,
+		TotalMatter: utils.TOTAL_MATTER,
 		ContainedCivilizations: make(map[*Coordinate]*Civilization),
 	}
 }
@@ -38,13 +30,27 @@ func (u *Universe) GetArea() float64 {
 	return float64(u.width * u.height)
 }
 
+func (u *Universe) GetNearbyCivilizations(c *Civilization, limit int) []*Civilization {
+	all_pos := make([]*Coordinate, 0, len(u.ContainedCivilizations))
+	for pos, _ := range u.ContainedCivilizations {
+		all_pos = append(all_pos, pos)
+	}
+	sorted_pos := SortByDistance(c.Position, all_pos)
+	nearby_civils := make([]*Civilization, limit, limit)
+	for i := 0; i < limit; i++ {
+		nearby_civils[i] = u.ContainedCivilizations[sorted_pos[i]]
+	}
+	return nearby_civils
+}
+
 /**
  * this function evolves the universe, and existing
  * civilizations, and create new civlization based on
  * randomeness
  */
 func (u *Universe) Evovle(num_year int) {
-	u.Duration += 1
+	// TODO: add broadcasting mechanism for civilization
+	u.NumYears += 1
 	for pos, civil := range u.ContainedCivilizations {
 		civil.Evovle(num_year)
 		fmt.Println("Civilization ", civil.Id, " at position ", pos, " has evovled")
@@ -52,12 +58,14 @@ func (u *Universe) Evovle(num_year int) {
 	shouldCreateUniverse := rand.Intn(10) > 5 // TODO: this should change to something based on num of existing civil
 	if shouldCreateUniverse {
 		new_pos := &Coordinate {
-			x: rand.Int63n(WIDTH),
-			y: rand.Int63n(HEIGHT),
+			x: rand.Int63n(utils.WIDTH),
+			y: rand.Int63n(utils.HEIGHT),
 		}
 		id := len(u.ContainedCivilizations) + 1
-		new_c := NewCivilization(id, new_pos, CONSERVATIVE, u) // TODO: create conservative civilization for now
+		new_c := NewCivilization(id, new_pos, utils.CONSERVATIVE, u) // TODO: create conservative civilization for now
 		u.ContainedCivilizations[new_pos] = new_c
+		// start message receiving process
+		go new_c.ProcessMessage()
 		fmt.Println("Civilization ", id, " is created!!")
 	}
 }
