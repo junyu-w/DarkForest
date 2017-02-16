@@ -78,6 +78,10 @@ func (c *Civilization) BroadcastPosition() {
 	}
 }
 
+/**
+ * Send message to another civilization via its message channel, this 
+ * simulates the late arrival of message using a timer
+ */
 func (c *Civilization) SendMessage(timer int, channel chan *Coordinate) {
 	for {
 		if c.NumYears + timer <= c.ContainerUniverse.NumYears {
