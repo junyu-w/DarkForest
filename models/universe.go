@@ -49,6 +49,7 @@ func (u *Universe) GetNearbyCivilizations(c *Civilization, limit int) []*Civiliz
  */
 func (u *Universe) Evovle(num_year int) {
 	u.NumYears += num_year
+	fmt.Println("Universe has evovled ", u.NumYears, "years")
 	for _, civil := range u.ContainedCivilizations {
 		civil.Evovle(num_year)
 		// fmt.Println("[EVOLVE] Civilization ", civil.Id, " at position ", pos, " has evovled")
@@ -68,6 +69,6 @@ func (u *Universe) Evovle(num_year int) {
 		u.ContainedCivilizations[new_pos] = new_c
 		// start message receiving process
 		go new_c.ProcessMessage()
-		fmt.Println("[CREATE] Civilization ", id, " is created!!")
+		fmt.Println("[CREATE] Civilization ", id, " is created at position ", new_c.Position)
 	}
 }

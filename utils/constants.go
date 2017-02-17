@@ -22,10 +22,10 @@ const (
 
 // assume a fixed size universe
 const (
-	WIDTH  int64 = 10e6
-	HEIGHT int64 = 10e6
+	WIDTH  int64 = 10e+5 // unit: lightyear
+	HEIGHT int64 = 10e+5 // 10e6
 )
 
 const (
-	TOTAL_MATTER float64 = 10e10
+	TOTAL_MATTER float64 = 10e+5
 )

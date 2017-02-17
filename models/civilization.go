@@ -4,6 +4,7 @@ import (
 	"dark_forest/utils"
 	"fmt"
 	"math/rand"
+	"time"
 )
 
 type Civilization struct {
@@ -25,8 +26,8 @@ func NewCivilization(id int, pos *Coordinate, category string, universe *Univers
 		Position:          pos,
 		Type:              category,
 		NumYears:          0,
-		Range:             10e-10,
-		MatterOwned:       10e-5,
+		Range:             10e-2,
+		MatterOwned:       10e-2,
 		Level:             utils.LIGHTSPEED_x0001,
 		ContainerUniverse: universe,
 		Revealed:          false,
@@ -49,15 +50,15 @@ func (c *Civilization) Evovle(num_year int) {
 
 func getLevel(matterPercentage float64) int {
 	switch {
-	case matterPercentage >= 10e-13:
-		return utils.LIGHTSPEED_x0001
-	case matterPercentage >= 10e-11:
-		return utils.LIGHTSPEED_x001
-	case matterPercentage >= 10e-7:
-		return utils.LIGHTSPEED_x1
 	case matterPercentage >= 10e-5:
-		return utils.LIGHTSPEED_x2
+		return utils.LIGHTSPEED_x0001
+	case matterPercentage >= 10e-4:
+		return utils.LIGHTSPEED_x001
+	case matterPercentage >= 10e-3:
+		return utils.LIGHTSPEED_x1
 	case matterPercentage >= 10e-2:
+		return utils.LIGHTSPEED_x2
+	case matterPercentage >= 10e-1:
 		return utils.LIGHTSPEED_x10
 	}
 	return utils.LIGHTSPEED_x0001
@@ -74,7 +75,7 @@ func (c *Civilization) BroadcastPosition() {
 	for _, civil := range nearby_civils {
 		dist := GetDistance(c.Position, civil.Position)
 		arrival_time := int(dist/speed) + c.NumYears
-		fmt.Println("from ", c.Id, " to ", civil.Id, "now: ", c.NumYears, " then: ", arrival_time)
+		//fmt.Println("from ", c.Id, " to ", civil.Id, "now: ", c.NumYears, " then: ", arrival_time)
 		go c.SendMessage(arrival_time, civil.MessageChannel)
 	}
 }
@@ -85,6 +86,7 @@ func (c *Civilization) BroadcastPosition() {
  */
 func (c *Civilization) SendMessage(arrival_time int, channel chan *Coordinate) {
 	for {
+		time.Sleep(time.Millisecond * 50)
 		if c.NumYears >= arrival_time {
 			channel <- c.Position
 			break
