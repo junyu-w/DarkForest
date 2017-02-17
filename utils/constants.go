@@ -29,3 +29,10 @@ const (
 const (
 	TOTAL_MATTER float64 = 10e+5
 )
+
+// ########## Gaming Window ####################
+const (
+	G_WIDTH  int     = 150
+	G_HEIGHT int     = 100
+	G_SCALE  float64 = 5
+)
