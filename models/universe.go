@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"github.com/hajimehoshi/ebiten"
 	"math/rand"
-	"time"
 )
 
 type Universe struct {
