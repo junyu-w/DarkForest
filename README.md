@@ -28,4 +28,11 @@ if TL;DR {
 * Red Squares -- Revealed Civilization (who broadcasted their coordinates)
 * Green Squares -- Civilization that received the messages of broadcasters (Red ones)
 
+### TODOs
+1. haven't used attributes like OwnedMatter etc to determine the relative strength of different civilizations
+2. drawing code are kind of mixed up in the models (probably wont fix cuz lazy)
+3. didn't fully model chain of suspicion and tech explosion (which were the original ambitious goals)
+
+### Conclusion
+Go has a lot of good features, like powerful interface system, built-in concurrency mechanism via goroutines and channels (really helped model all civilizations at the same time). But it isn't a really suitable choice for GUI application (or I might just suck at doing this LOL)
 
