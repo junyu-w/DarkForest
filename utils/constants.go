@@ -22,17 +22,17 @@ const (
 
 // assume a fixed size universe
 const (
-	WIDTH  int64 = 10e+5 // unit: lightyear
-	HEIGHT int64 = 10e+5 // 10e6
+	WIDTH  int64 = 10e+2 // unit: lightyear
+	HEIGHT int64 = 10e+2 // 10e6
 )
 
 const (
-	TOTAL_MATTER float64 = 10e+5
+	TOTAL_MATTER float64 = 10e+2
 )
 
 // ########## Gaming Window ####################
 const (
-	G_WIDTH  int     = 150
-	G_HEIGHT int     = 100
-	G_SCALE  float64 = 5
+	G_WIDTH  int     = 600
+	G_HEIGHT int     = 450
+	G_SCALE  float64 = 3
 )

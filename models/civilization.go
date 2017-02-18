@@ -3,6 +3,8 @@ package models
 import (
 	"dark_forest/utils"
 	"fmt"
+	"github.com/hajimehoshi/ebiten"
+	"image/color"
 	"math/rand"
 	"time"
 )
@@ -18,6 +20,7 @@ type Civilization struct {
 	ContainerUniverse *Universe
 	Revealed          bool
 	MessageChannel    chan *Coordinate
+	Color             color.NRGBA
 }
 
 func NewCivilization(id int, pos *Coordinate, category string, universe *Universe) *Civilization {
@@ -32,8 +35,13 @@ func NewCivilization(id int, pos *Coordinate, category string, universe *Univers
 		ContainerUniverse: universe,
 		Revealed:          false,
 		MessageChannel:    make(chan *Coordinate),
+		Color:             HIDDEN_COLOR,
 	}
 }
+
+var REVEAL_COLOR color.NRGBA = color.NRGBA{0xff, 0x00, 0x00, 0xff}
+var HIDDEN_COLOR color.NRGBA = color.NRGBA{0xff, 0xff, 0xff, 0xff}
+var DISCOVER_COLOR color.NRGBA = color.NRGBA{0x7f, 0xff, 0x00, 0xff}
 
 /**
  * this function evolves civilization, including increase its
@@ -70,6 +78,7 @@ func getLevel(matterPercentage float64) int {
 func (c *Civilization) BroadcastPosition() {
 	speed := getInfoSpeed(c.Level)
 	c.Revealed = true
+	c.Color = REVEAL_COLOR
 	nearby_civils := c.ContainerUniverse.GetNearbyCivilizations(c, 10)
 	fmt.Println("[REVEAL] Civilization ", c.Id, "choose to broadcast position")
 	for _, civil := range nearby_civils {
@@ -77,6 +86,7 @@ func (c *Civilization) BroadcastPosition() {
 		arrival_time := int(dist/speed) + c.NumYears
 		//fmt.Println("from ", c.Id, " to ", civil.Id, "now: ", c.NumYears, " then: ", arrival_time)
 		go c.SendMessage(arrival_time, civil.MessageChannel)
+		go civil.ProcessMessage()
 	}
 }
 
@@ -86,11 +96,24 @@ func (c *Civilization) BroadcastPosition() {
  */
 func (c *Civilization) SendMessage(arrival_time int, channel chan *Coordinate) {
 	for {
-		time.Sleep(time.Millisecond * 50)
+		// fmt.Println("arrive at ", arrival_time, " now: ", c.NumYears)
 		if c.NumYears >= arrival_time {
 			channel <- c.Position
 			break
 		}
+		time.Sleep(time.Millisecond * 50)
+	}
+}
+
+// TODO: what to do after message arrived
+func (civil *Civilization) ProcessMessage() {
+	for {
+		info := <-civil.MessageChannel
+		fmt.Printf("[DISCOVERY] Civilization %d got position (%d, %d)\n", civil.Id, info.x, info.y)
+		if civil.Revealed == false {
+			civil.Color = DISCOVER_COLOR
+		}
+		time.Sleep(time.Millisecond * 50)
 	}
 }
 
@@ -110,10 +133,23 @@ func getInfoSpeed(civil_level int) float64 {
 	return utils.LIGHTSPEED * 0.0001
 }
 
-// TODO: what to do after message arrived
-func (civil *Civilization) ProcessMessage() {
-	for {
-		info := <-civil.MessageChannel
-		fmt.Printf("[DISCOVERY] Civilization %d got position (%d, %d)\n", civil.Id, info.x, info.y)
+func (civil *Civilization) ChooseToRevealPosition() bool {
+	rand_num := rand.Int31n(100000)
+	if rand_num > 99990 && civil.Revealed == false {
+		return true
 	}
+	return false
+}
+
+func (civil *Civilization) Shape() (*ebiten.Image, error) {
+	square, err := ebiten.NewImage(2, 2, ebiten.FilterNearest)
+	return square, err
+}
+
+func (civil *Civilization) GameWindowPosition() (float64, float64) {
+	return civil.Position.TranslateToGameWindowPosition()
+}
+
+func (civil *Civilization) Draw(screen *ebiten.Image) {
+	utils.DrawShapeAtPositionWithColor(civil, screen, civil.Color)
 }

@@ -1,6 +1,7 @@
 package models
 
 import (
+	"dark_forest/utils"
 	"math"
 	"sort"
 )
@@ -47,4 +48,10 @@ func SortByDistance(orig *Coordinate, all []*Coordinate) []*Coordinate {
 		sorted_coord[i] = coord_dist_list[i].coord.(*Coordinate)
 	}
 	return sorted_coord[2:len(all)]
+}
+
+func (coord *Coordinate) TranslateToGameWindowPosition() (float64, float64) {
+	scale_x := float64(utils.WIDTH) / (float64(utils.G_WIDTH))
+	scale_y := float64(utils.HEIGHT) / (float64(utils.G_HEIGHT))
+	return float64(coord.x) / scale_x, float64(coord.y) / scale_y
 }

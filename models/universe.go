@@ -3,7 +3,9 @@ package models
 import (
 	"dark_forest/utils"
 	"fmt"
+	"github.com/hajimehoshi/ebiten"
 	"math/rand"
+	"time"
 )
 
 type Universe struct {
@@ -43,6 +45,14 @@ func (u *Universe) GetNearbyCivilizations(c *Civilization, limit int) []*Civiliz
 }
 
 /**
+ * update universe & civil and reflect on UI
+ */
+func (u *Universe) UpdateAndDrawUniverse(num_year int, screen *ebiten.Image) {
+	u.Evovle(num_year)
+	u.UpdateAndDrawCivilization(num_year, screen)
+}
+
+/**
  * this function evolves the universe, and existing
  * civilizations, and create new civlization based on
  * randomeness
@@ -50,16 +60,9 @@ func (u *Universe) GetNearbyCivilizations(c *Civilization, limit int) []*Civiliz
 func (u *Universe) Evovle(num_year int) {
 	u.NumYears += num_year
 	fmt.Println("Universe has evovled ", u.NumYears, "years")
-	for _, civil := range u.ContainedCivilizations {
-		civil.Evovle(num_year)
-		// fmt.Println("[EVOLVE] Civilization ", civil.Id, " at position ", pos, " has evovled")
-		// TODO: add broadcasting mechanism for civilization
-		if len(u.ContainedCivilizations) > 10 && civil.Revealed == false {
-			civil.BroadcastPosition()
-		}
-	}
-	shouldCreateUniverse := rand.Intn(10) > 5 // TODO: this should change to something based on num of existing civil
-	if shouldCreateUniverse {
+	// create civilization
+	shouldCreateCivilization := rand.Intn(100) > 80 // TODO: this should change to something based on num of existing civil
+	if shouldCreateCivilization {
 		new_pos := &Coordinate{
 			x: rand.Int63n(utils.WIDTH),
 			y: rand.Int63n(utils.HEIGHT),
@@ -68,7 +71,16 @@ func (u *Universe) Evovle(num_year int) {
 		new_c := NewCivilization(id, new_pos, utils.CONSERVATIVE, u) // TODO: create conservative civilization for now
 		u.ContainedCivilizations[new_pos] = new_c
 		// start message receiving process
-		go new_c.ProcessMessage()
 		fmt.Println("[CREATE] Civilization ", id, " is created at position ", new_c.Position)
+	}
+}
+
+func (u *Universe) UpdateAndDrawCivilization(num_year int, screen *ebiten.Image) {
+	for _, civil := range u.ContainedCivilizations {
+		civil.Evovle(num_year)
+		if len(u.ContainedCivilizations) > 50 && civil.ChooseToRevealPosition() {
+			civil.BroadcastPosition()
+		}
+		civil.Draw(screen)
 	}
 }
