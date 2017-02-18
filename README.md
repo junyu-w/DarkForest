@@ -30,6 +30,10 @@ if TL;DR {
 3. `sudo chmod 777 main`
 4. double click main (not main.go) OR `./main`
 
+### How to import
+1. `go get github.com/DrakeW/DarkForest`
+2. in Go file, `import "github.com/DrakeW/DarkForest"`
+
 ### TODOs
 1. haven't used attributes like OwnedMatter etc to determine the relative strength of different civilizations
 2. drawing code are kind of mixed up in the models (probably wont fix cuz lazy)
