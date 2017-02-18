@@ -24,6 +24,12 @@ if TL;DR {
 * Red Squares -- Revealed Civilization (who broadcasted their coordinates)
 * Green Squares -- Civilization that received the messages of broadcasters (Red ones)
 
+### How to run
+1. Download/Clone the project
+2. `cd main`
+3. `sudo chmod 777 main`
+4. double click main (not main.go) OR `./main`
+
 ### TODOs
 1. haven't used attributes like OwnedMatter etc to determine the relative strength of different civilizations
 2. drawing code are kind of mixed up in the models (probably wont fix cuz lazy)
