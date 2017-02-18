@@ -114,7 +114,7 @@ func (civil *Civilization) ProcessMessage() {
 		switch info.(type) {
 		case *Coordinate:
 			civil.ContainerUniverse.ChangeUniversalMessage(fmt.Sprintf("[DISCOVER] Civilization %d Found (%d, %d)", civil.Id, info.(*Coordinate).x, info.(*Coordinate).y))
-			if civil.Revealed == false {
+			if civil.Revealed == false && civil.Color != DEATH_COLOR {
 				civil.Color = DISCOVER_COLOR
 				civil.InitiateDarkForestAttack(info.(*Coordinate))
 			}
@@ -165,7 +165,7 @@ func (civil *Civilization) ChooseToRevealPosition() bool {
 
 func (civil *Civilization) Shape() (*ebiten.Image, error) {
 	size := 2
-	if civil.Revealed == true {
+	if civil.Revealed == true && civil.Color != DEATH_COLOR {
 		size = 4
 	}
 	square, err := ebiten.NewImage(size, size, ebiten.FilterNearest)

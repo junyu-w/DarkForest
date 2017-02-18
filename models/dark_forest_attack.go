@@ -17,7 +17,9 @@ func (dfa *DarkForestAttack) Execute() error {
 		return ALREADY_DESTROTYED
 	}
 	target.Color = DEATH_COLOR
-	dfa.attacker.Color = HIDDEN_COLOR
+	if dfa.attacker.Color != DEATH_COLOR {
+		dfa.attacker.Color = HIDDEN_COLOR
+	}
 	return nil
 }
 
