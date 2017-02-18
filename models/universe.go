@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"github.com/hajimehoshi/ebiten"
 	"math/rand"
+	"sync"
 )
 
 type Universe struct {
@@ -14,6 +15,8 @@ type Universe struct {
 	NumYears               int // unit: year
 	TotalMatter            float64
 	ContainedCivilizations map[*Coordinate]*Civilization
+	UniversalMessage       string
+	MutexLock              *sync.Mutex
 }
 
 func NewUniverse() *Universe {
@@ -23,6 +26,8 @@ func NewUniverse() *Universe {
 		NumYears:               0,
 		TotalMatter:            utils.TOTAL_MATTER,
 		ContainedCivilizations: make(map[*Coordinate]*Civilization),
+		UniversalMessage:       "Welcome to Dark Forest",
+		MutexLock:              &sync.Mutex{},
 	}
 }
 
@@ -43,6 +48,18 @@ func (u *Universe) GetNearbyCivilizations(c *Civilization, limit int) []*Civiliz
 	return nearby_civils
 }
 
+func (u *Universe) RemoveCivilAtPosition(c *Coordinate) {
+	delete(u.ContainedCivilizations, c)
+}
+
+func (u *Universe) GetCivilAtPosition(c *Coordinate) *Civilization {
+	return u.ContainedCivilizations[c]
+}
+
+func (u *Universe) ChangeUniversalMessage(msg string) {
+	u.UniversalMessage = msg
+}
+
 /**
  * update universe & civil and reflect on UI
  */
@@ -58,9 +75,9 @@ func (u *Universe) UpdateAndDrawUniverse(num_year int, screen *ebiten.Image) {
  */
 func (u *Universe) Evovle(num_year int) {
 	u.NumYears += num_year
-	fmt.Println("Universe has evovled ", u.NumYears, "years")
+	// fmt.Println("Universe has evovled ", u.NumYears, "years")
 	// create civilization
-	shouldCreateCivilization := rand.Intn(100) > 80 // TODO: this should change to something based on num of existing civil
+	shouldCreateCivilization := rand.Intn(100) > 80 && len(u.ContainedCivilizations) < utils.CIVIL_LIMIT // TODO: this should change to something based on num of existing civil
 	if shouldCreateCivilization {
 		new_pos := &Coordinate{
 			x: rand.Int63n(utils.WIDTH),

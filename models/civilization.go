@@ -19,7 +19,7 @@ type Civilization struct {
 	Level             int
 	ContainerUniverse *Universe
 	Revealed          bool
-	MessageChannel    chan *Coordinate
+	MessageChannel    chan CivilMessage
 	Color             color.NRGBA
 }
 
@@ -34,7 +34,7 @@ func NewCivilization(id int, pos *Coordinate, category string, universe *Univers
 		Level:             utils.LIGHTSPEED_x0001,
 		ContainerUniverse: universe,
 		Revealed:          false,
-		MessageChannel:    make(chan *Coordinate),
+		MessageChannel:    make(chan CivilMessage),
 		Color:             HIDDEN_COLOR,
 	}
 }
@@ -42,6 +42,7 @@ func NewCivilization(id int, pos *Coordinate, category string, universe *Univers
 var REVEAL_COLOR color.NRGBA = color.NRGBA{0xff, 0x00, 0x00, 0xff}
 var HIDDEN_COLOR color.NRGBA = color.NRGBA{0xff, 0xff, 0xff, 0xff}
 var DISCOVER_COLOR color.NRGBA = color.NRGBA{0x7f, 0xff, 0x00, 0xff}
+var DEATH_COLOR color.NRGBA = color.NRGBA{0x00, 0x00, 0x00, 0x00}
 
 /**
  * this function evolves civilization, including increase its
@@ -80,25 +81,26 @@ func (c *Civilization) BroadcastPosition() {
 	c.Revealed = true
 	c.Color = REVEAL_COLOR
 	nearby_civils := c.ContainerUniverse.GetNearbyCivilizations(c, 10)
-	fmt.Println("[REVEAL] Civilization ", c.Id, "choose to broadcast position")
+	c.ContainerUniverse.ChangeUniversalMessage(fmt.Sprintf("[REVEAL] Civilization %d choose to broadcast position", c.Id))
 	for _, civil := range nearby_civils {
 		dist := GetDistance(c.Position, civil.Position)
 		arrival_time := int(dist/speed) + c.NumYears
-		//fmt.Println("from ", c.Id, " to ", civil.Id, "now: ", c.NumYears, " then: ", arrival_time)
-		go c.SendMessage(arrival_time, civil.MessageChannel)
+		go c.SendMessage(arrival_time, civil.MessageChannel, c.Position)
 		go civil.ProcessMessage()
 	}
 }
+
+type CivilMessage interface{}
 
 /**
  * Send message to another civilization via its message channel, this
  * simulates the late arrival of message using a timer
  */
-func (c *Civilization) SendMessage(arrival_time int, channel chan *Coordinate) {
+func (c *Civilization) SendMessage(arrival_time int, channel chan CivilMessage, msg CivilMessage) {
 	for {
 		// fmt.Println("arrive at ", arrival_time, " now: ", c.NumYears)
 		if c.NumYears >= arrival_time {
-			channel <- c.Position
+			channel <- msg
 			break
 		}
 		time.Sleep(time.Millisecond * 20)
@@ -109,12 +111,32 @@ func (c *Civilization) SendMessage(arrival_time int, channel chan *Coordinate) {
 func (civil *Civilization) ProcessMessage() {
 	for {
 		info := <-civil.MessageChannel
-		fmt.Printf("[DISCOVERY] Civilization %d got position (%d, %d)\n", civil.Id, info.x, info.y)
-		if civil.Revealed == false {
-			civil.Color = DISCOVER_COLOR
+		switch info.(type) {
+		case *Coordinate:
+			civil.ContainerUniverse.ChangeUniversalMessage(fmt.Sprintf("[DISCOVER] Civilization %d Found (%d, %d)", civil.Id, info.(*Coordinate).x, info.(*Coordinate).y))
+			if civil.Revealed == false {
+				civil.Color = DISCOVER_COLOR
+				civil.InitiateDarkForestAttack(info.(*Coordinate))
+			}
+		case *DarkForestAttack:
+			dfa := info.(*DarkForestAttack)
+			if err := dfa.Execute(); err == ALREADY_DESTROTYED {
+				dfa.attacker.Color = HIDDEN_COLOR
+				continue
+			}
+			civil.ContainerUniverse.ChangeUniversalMessage(fmt.Sprintf("[DFA] Civilization %d Destroyed %d", dfa.attacker.Id, civil.ContainerUniverse.GetCivilAtPosition(dfa.victim_pos).Id))
 		}
 		time.Sleep(time.Millisecond * 20)
 	}
+}
+
+func (civil *Civilization) InitiateDarkForestAttack(coord *Coordinate) {
+	target_civil := civil.ContainerUniverse.GetCivilAtPosition(coord)
+	speed := getInfoSpeed(civil.Level)
+	dist := GetDistance(civil.Position, coord)
+	arrival_time := int(dist/speed) + civil.NumYears
+	dfa := NewDFAttack(civil, coord)
+	go civil.SendMessage(arrival_time, target_civil.MessageChannel, dfa)
 }
 
 func getInfoSpeed(civil_level int) float64 {
@@ -142,7 +164,11 @@ func (civil *Civilization) ChooseToRevealPosition() bool {
 }
 
 func (civil *Civilization) Shape() (*ebiten.Image, error) {
-	square, err := ebiten.NewImage(2, 2, ebiten.FilterNearest)
+	size := 2
+	if civil.Revealed == true {
+		size = 4
+	}
+	square, err := ebiten.NewImage(size, size, ebiten.FilterNearest)
 	return square, err
 }
 

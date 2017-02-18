@@ -2,8 +2,9 @@ package controllers
 
 import (
 	"dark_forest/models"
+	"fmt"
 	"github.com/hajimehoshi/ebiten"
-	// "github.com/hajimehoshi/ebiten/ebitenutil" // This is required to draw debug texts.
+	"github.com/hajimehoshi/ebiten/ebitenutil" // This is required to draw debug texts.
 )
 
 type UniverseController struct {
@@ -18,8 +19,8 @@ func NewUniverseController(uni *models.Universe) *UniverseController {
 
 func (u *UniverseController) UpdateUniverse(screen *ebiten.Image) error {
 	u.UpdateAndDrawUniverse(10000, screen)
-	// if err := ebitenutil.DebugPrint(screen, "Our first game in Ebiten!"); err != nil {
-	// 	return err
-	// }
+	if err := ebitenutil.DebugPrint(screen, fmt.Sprintf("%s\nUniverse Age: %d", u.UniversalMessage, u.NumYears)); err != nil {
+		return err
+	}
 	return nil
 }
