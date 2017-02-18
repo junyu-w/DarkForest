@@ -1,9 +1,9 @@
 package dark_forest
 
 import (
-	"dark_forest/controllers"
-	"dark_forest/models"
-	"dark_forest/utils"
+	"github.com/DrakeW/DarkForest/controllers"
+	"github.com/DrakeW/DarkForest/models"
+	"github.com/DrakeW/DarkForest/utils"
 	"github.com/hajimehoshi/ebiten"
 )
 

@@ -1,7 +1,7 @@
 package controllers
 
 import (
-	"dark_forest/models"
+	"github.com/DrakeW/DarkForest/models"
 	"fmt"
 	"github.com/hajimehoshi/ebiten"
 	"github.com/hajimehoshi/ebiten/ebitenutil" // This is required to draw debug texts.
