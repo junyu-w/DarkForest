@@ -6,16 +6,12 @@ This project simulates the Dark Forest model of the Universe as described in the
 Go READ the book.
 ```{go}
 if TL;DR { 
-	intro1 := "civilizations are like citizens of the dark forest, \\
-	and they are hidden from each other. Some of them naively think that all civilizations would be friendly to each other"
-
-	intro2 := "some high-level civilizations already learnt the dark forest model of the universe \\
-	so they chose to remain quiet and hideen. But for those who didn't, they either lit up a fire or shouted \\
-	greetings hoping to hear back from their 'brothers'"
-
-	intro3 := "however, because of barrier of communication (or chain of suspicion) and technology \\ 
-	explosion (this part is something you should definitely read in the book), those who heard the  \\
-	voices or saw the fire only had one choice but to destroy the rule breaker in order to keep its own safety"
+	intro1 := “The universe has already been filled with civilizations and the universe \\ 
+	is a dark forest. Every civilization is a hunter with guns. They are sneaking through \\ 
+	the forest like ghosts, trying to carefully hide their traces and keep extremely quiet,\\
+	because there are numberless other hunters who are as dangerous. If a hunter discovers \\
+	another hunter, the only choice is to kill him. In the forest, others are hell and eternal\\
+	threat. Anyone who reveals his exact location is bound to be doomed.”
 
 	return Dark_Forest_Simulator
 }
