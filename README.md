@@ -34,5 +34,5 @@ if TL;DR {
 3. didn't fully model chain of suspicion and tech explosion (which were the original ambitious goals)
 
 ### Conclusion
-Go has a lot of good features, like powerful interface system, built-in concurrency mechanism via goroutines and channels (really helped model all civilizations at the same time). But it isn't a really suitable choice for GUI application (or I might just suck at doing this LOL)
+Go has a lot of good features, like powerful interface system, built-in concurrency mechanism via goroutines and channels (really helped model all civilizations at the same time). It's perfect for server side programming and command line tools, but it probably isn't a really suitable choice for GUI rendering (or it could be me who's not good at writing efficent GUI rendering code in Go :) ).
 
