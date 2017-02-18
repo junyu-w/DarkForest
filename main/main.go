@@ -1,7 +1,7 @@
 package main
 
 import (
-	"dark_forest"
+	"github.com/DrakeW/DarkForest"
 )
 
 func main() {

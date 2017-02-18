@@ -1,7 +1,7 @@
 package models
 
 import (
-	"dark_forest/utils"
+	"github.com/DrakeW/DarkForest/utils"
 	"fmt"
 	"github.com/hajimehoshi/ebiten"
 	"math/rand"
