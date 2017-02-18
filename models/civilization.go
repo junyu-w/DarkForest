@@ -101,7 +101,7 @@ func (c *Civilization) SendMessage(arrival_time int, channel chan *Coordinate) {
 			channel <- c.Position
 			break
 		}
-		time.Sleep(time.Millisecond * 50)
+		time.Sleep(time.Millisecond * 20)
 	}
 }
 
@@ -113,7 +113,7 @@ func (civil *Civilization) ProcessMessage() {
 		if civil.Revealed == false {
 			civil.Color = DISCOVER_COLOR
 		}
-		time.Sleep(time.Millisecond * 50)
+		time.Sleep(time.Millisecond * 20)
 	}
 }
 

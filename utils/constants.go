@@ -32,7 +32,7 @@ const (
 
 // ########## Gaming Window ####################
 const (
-	G_WIDTH  int     = 600
-	G_HEIGHT int     = 450
+	G_WIDTH  int     = 400
+	G_HEIGHT int     = 250
 	G_SCALE  float64 = 3
 )
